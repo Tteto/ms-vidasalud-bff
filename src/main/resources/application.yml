@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ms-vidasalud-bff
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Ojo con el /v2.0 al final: si falta, el issuer del token
+          # (que Azure emite con /v2.0) no calza y todo token válido
+          # es rechazado igual.
+          issuer-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
+
+azure:
+  ad:
+    # Application ID URI de la App Registration "vidasalud-api"
+    audience: api://${AZURE_API_CLIENT_ID}
+
+microservicios:
+  appointments-url: ${APPOINTMENTS_URL:http://localhost:8081}
+  catalog-url: ${CATALOG_URL:http://localhost:8082}
+  report-url: ${REPORT_URL:http://localhost:8083}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
