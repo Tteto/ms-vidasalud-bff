@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 @Component
 public class AzureRolesConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
+    private static final String ROL_POR_DEFECTO = "PACIENTE";
+
     private final JwtGrantedAuthoritiesConverter scopesConverter = new JwtGrantedAuthoritiesConverter();
 
     @Override
@@ -24,8 +26,11 @@ public class AzureRolesConverter implements Converter<Jwt, AbstractAuthenticatio
         Collection<GrantedAuthority> scopeAuthorities = scopesConverter.convert(jwt);
 
         List<String> roles = jwt.getClaimAsStringList("roles");
-        Stream<GrantedAuthority> roleAuthorities = (roles == null ? List.<String>of() : roles)
-                .stream()
+        if (roles == null || roles.isEmpty()) {
+            roles = List.of(ROL_POR_DEFECTO);
+        }
+
+        Stream<GrantedAuthority> roleAuthorities = roles.stream()
                 .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.toUpperCase()));
 
         Collection<GrantedAuthority> authorities = Stream
