@@ -25,7 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
         "azure.ad.audience=api://test-audience",
-        "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://login.microsoftonline.com/test-tenant/v2.0"
+        "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://login.microsoftonline.com/test-tenant/v2.0",
+        // Puerto sin nada escuchando: el test no depende de que haya
+        // (o no) un microservicio corriendo en la máquina.
+        "microservicios.report-url=http://localhost:1"
 })
 class SecurityConfigTest {
 
@@ -51,10 +54,11 @@ class SecurityConfigTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void conRolCorrectoNoDebeRetornar401Ni403() throws Exception {
-        // El proxy intentará llamar al microservicio real y fallará por
-        // conexión (no está levantado en el test), pero eso confirma
-        // que la capa de seguridad SÍ dejó pasar la request.
+        // La seguridad deja pasar la request; luego el proxy no logra
+        // conectar con el microservicio y el BFF responde 503 (Service
+        // Unavailable). Que llegue a 503, y no a 401/403, confirma que
+        // la capa de seguridad SÍ autorizó al rol ADMIN.
         mockMvc.perform(get("/api/report/kpis"))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isServiceUnavailable());
     }
 }

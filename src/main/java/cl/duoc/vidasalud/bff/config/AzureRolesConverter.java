@@ -14,18 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Azure AD entrega los App Roles asignados al usuario en el claim
- * "roles" del access token (ej: ["Admin"] o ["Recepcionista"]).
- *
- * Spring Security, por defecto, solo sabe leer el claim estándar
- * "scope"/"scp". Si no se registra este converter, hasRole("ADMIN") y
- * @PreAuthorize siempre van a fallar aunque el token traiga el rol
- * correcto — es el error más común en este punto de la rúbrica.
- *
- * También se mantienen los scopes (para endpoints protegidos por scope
- * en vez de por rol), con el prefijo SCOPE_ que usa Spring por defecto.
- */
 @Component
 public class AzureRolesConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
